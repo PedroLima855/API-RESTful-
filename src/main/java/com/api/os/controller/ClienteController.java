@@ -3,6 +3,8 @@ package com.api.os.controller;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.api.os.model.Cliente;
 import com.api.os.repository.ClienteRepository;
+import com.api.os.service.CadastroClienteService;
 @RequestMapping("clientes")
 @RestController
 public class ClienteController {
 	
 	@Autowired
 	ClienteRepository clienteRepository;
+	
+	@Autowired
+	CadastroClienteService cadastroCliente;
 	
 	// retorna uma lista de registros, por padrão já retorna o cod 200 ok
 	@GetMapping
@@ -47,13 +53,13 @@ public class ClienteController {
 	// Salva um registro 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Cliente salvar(@RequestBody Cliente cliente) {
-		return clienteRepository.save(cliente);
+	public Cliente salvar(@Valid @RequestBody Cliente cliente) {
+		return cadastroCliente.salvar(cliente);
 	}
 	
 	// Edita um registro 
 	@PutMapping("/{clienteId}")
-	public ResponseEntity<Cliente> editar(@PathVariable Long clienteId, @RequestBody Cliente cliente){
+	public ResponseEntity<Cliente> editar(@Valid @PathVariable Long clienteId, @RequestBody Cliente cliente){
 		
 		// essa condição verifica se há algum registro salvo
 		if(!clienteRepository.existsById(clienteId)) {
@@ -61,7 +67,7 @@ public class ClienteController {
 		}
 		
 		cliente.setId(clienteId);
-		cliente = clienteRepository.save(cliente);
+		cliente = cadastroCliente.salvar(cliente);
 		
 		return ResponseEntity.ok(cliente);
 		
@@ -77,7 +83,7 @@ public class ClienteController {
 			return ResponseEntity.notFound().build();
 		}
 		
-		clienteRepository.deleteById(clienteId);
+		cadastroCliente.deletar(clienteId);
 		
 		return ResponseEntity.noContent().build();
 	}
